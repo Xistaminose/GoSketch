@@ -11,7 +11,7 @@ const goModTemplate = `module %s
 
 go 1.22.0
 
-require github.com/Xistaminose/gosketch v0.0.0-latest
+require github.com/Xistaminose/gosketch latest
 `
 
 func printUsage() {
