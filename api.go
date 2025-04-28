@@ -1,13 +1,15 @@
 /*
-Projeto: artegenerativa-go
-Descrição: Biblioteca de arte generativa estilo p5.js para Go.
-API global: Setup, Draw, CreateCanvas, Background, Fill, Ellipse, RenderShape.
+Projeto: GoSketch
+Descrição: Biblioteca de arte generativa 2D em Go inspirada em p5.js/Processing.
+Oferece API simples e intuitiva para criação de sketches interativos com formas geométricas,
+cores, animações e interatividade. Ideal para artistas e programadores explorarem arte
+computacional e visualização criativa.
 Adicionado: suporte a fill e interface Shape para formas extensíveis.
 Dependência mínima: Ebiten para janela e desenho 2D.
 */
 
-// generative/api.go
-package generative
+// sketch/api.go
+package sketch
 
 import (
 	"fmt"

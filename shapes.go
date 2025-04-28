@@ -1,4 +1,4 @@
-package generative
+package sketch
 
 import (
 	"image/color"
