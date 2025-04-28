@@ -194,14 +194,43 @@ func RenderShape(s shapes.Shape) {
 		return
 	}
 	
-	// Captura e reporta possíveis pânicos durante o desenho
-	defer func() {
-		if r := recover(); r != nil {
-			reportError(fmt.Errorf("pânico durante renderização: %v", r))
-		}
+	// Identifica o tipo de shape para relatórios de desempenho
+	shapeName := fmt.Sprintf("%T", s)
+	
+	// Define um timeout para detecção de shapes lentas
+	done := make(chan bool, 1)
+	var renderErr error
+	
+	// Executa o desenho em uma goroutine
+	go func() {
+		// Captura e reporta possíveis pânicos durante o desenho
+		defer func() {
+			if r := recover(); r != nil {
+				renderErr = fmt.Errorf("pânico durante renderização de %s: %v", shapeName, r)
+			}
+			done <- true
+		}()
+		
+		s.Draw(canvas, fillColor, strokeColor, fillEnabled, strokeEnabled, strokeWeight)
 	}()
 	
-	s.Draw(canvas, fillColor, strokeColor, fillEnabled, strokeEnabled, strokeWeight)
+	// Espera o desenho completar ou atingir timeout
+	select {
+	case <-done:
+		// Renderização completou normalmente
+		if renderErr != nil {
+			reportError(renderErr)
+		}
+	case <-time.After(100 * time.Millisecond): // Ajuste este timeout conforme necessário
+		// Timeout - a renderização está demorando demais
+		reportError(fmt.Errorf("timeout durante renderização de %s - possível bloqueio", shapeName))
+		// Continuamos a execução, não podemos cancelar a goroutine diretamente
+		// mas podemos reportar o problema
+		
+		// Opcional: pegar alguma informação sobre a shape
+		shapeInfo := fmt.Sprintf("%+v", s)
+		reportError(fmt.Errorf("detalhes da shape problemática: %s", shapeInfo))
+	}
 }
 
 // Run inicia o loop principal da janela Ebiten
