@@ -6,21 +6,16 @@ package main
 const basicTemplate = `package main
 
 import (
-	"image/color"
-	"github.com/Xistaminose/gosketch"  
+	"github.com/Xistaminose/gosketch"
 )
 
 func setup() {
 	gosketch.CreateCanvas(400, 400)
-	gosketch.Fill(color.RGBA{255, 100, 100, 255})
-	gosketch.Stroke(color.RGBA{0, 0, 0, 255})
-	gosketch.StrokeWeight(2)
 }
 
 func draw() {
-	gosketch.Background(color.RGBA{220, 220, 220, 255})
-	gosketch.NoStroke()
-	gosketch.RenderShape(&gosketch.EllipseShape{X: 200, Y: 200, Rx: 80, Ry: 50})
+	gosketch.Background(gosketch.Color(255))
+	gosketch.Point(200, 200)
 }
 
 func main() {
@@ -34,26 +29,23 @@ func main() {
 const rectangleTemplate = `package main
 
 import (
-	"image/color"
-	"github.com/Xistaminose/gosketch"  
+	"github.com/Xistaminose/gosketch"
 )
 
 func setup() {
 	gosketch.CreateCanvas(400, 400)
-	gosketch.Fill(color.RGBA{100, 150, 255, 255})
-	gosketch.Stroke(color.RGBA{50, 50, 50, 255})
-	gosketch.StrokeWeight(3)
 }
 
 func draw() {
-	gosketch.Background(color.RGBA{240, 240, 240, 255})
-	
+	gosketch.Background(gosketch.RGBA(240, 240, 240, 255))
+
 	// Desenha um retângulo central
-	gosketch.RenderShape(&gosketch.RectangleShape{X: 100, Y: 100, W: 200, H: 150})
-	
+	gosketch.Fill(gosketch.RGB(200, 200, 100))
+	gosketch.Rectangle(100, 100, 200, 150)
+
 	// Desenha um quadrado menor
-	gosketch.Fill(color.RGBA{255, 200, 100, 255})
-	gosketch.RenderShape(&gosketch.SquareShape{X: 150, Y: 150, Size: 100})
+	gosketch.Fill(gosketch.RGB(100, 200, 200))
+	gosketch.Square(150, 150, 100)
 }
 
 func main() {
@@ -61,39 +53,38 @@ func main() {
 	gosketch.Draw(draw)
 	gosketch.Run()
 }
+
 `
 
 // Template com linhas
 const lineTemplate = `package main
 
 import (
-	"image/color"
-	"github.com/Xistaminose/gosketch"  
+	"github.com/Xistaminose/gosketch"
 )
 
 func setup() {
 	gosketch.CreateCanvas(400, 400)
-	gosketch.Stroke(color.RGBA{0, 0, 0, 255})
-	gosketch.StrokeWeight(2)
 }
 
 func draw() {
-	gosketch.Background(color.RGBA{250, 250, 250, 255})
-	
+	gosketch.Background(gosketch.Color(255))
+
 	// Desenha uma grade de linhas
-	gosketch.Stroke(color.RGBA{200, 200, 200, 255})
+	gosketch.Stroke(gosketch.Color(200))
 	for i := 0; i < 400; i += 20 {
 		// Linhas horizontais
-		gosketch.RenderShape(&gosketch.LineShape{X1: 0, Y1: float64(i), X2: 400, Y2: float64(i)})
+		gosketch.Line(0, float64(i), 400, float64(i))
 		// Linhas verticais
-		gosketch.RenderShape(&gosketch.LineShape{X1: float64(i), Y1: 0, X2: float64(i), Y2: 400})
+		gosketch.Line(float64(i), 0, float64(i), 400)
 	}
-	
+
 	// Desenha algumas diagonais
-	gosketch.Stroke(color.RGBA{255, 100, 100, 255})
+	gosketch.Stroke(gosketch.RGB(255, 100, 100))
 	gosketch.StrokeWeight(3)
-	gosketch.RenderShape(&gosketch.LineShape{X1: 0, Y1: 0, X2: 400, Y2: 400})
-	gosketch.RenderShape(&gosketch.LineShape{X1: 0, Y1: 400, X2: 400, Y2: 0})
+
+	gosketch.Line(0, 0, 400, 400)
+	gosketch.Line(0, 400, 400, 0)
 }
 
 func main() {
