@@ -331,3 +331,21 @@ func Triangle(x1, y1, x2, y2, x3, y3 float64) {
 	shape := shapes.CreateTriangle(x1, y1, x2, y2, x3, y3)
 	RenderShape(shape)
 }
+
+// GetWidth retorna a largura do canvas atual
+func GetWidth() int {
+	if canvas == nil {
+		reportError(fmt.Errorf("tentativa de obter largura sem canvas inicializado"))
+		return 0
+	}
+	return canvas.Width
+}
+
+// GetHeight retorna a altura do canvas atual
+func GetHeight() int {
+	if canvas == nil {
+		reportError(fmt.Errorf("tentativa de obter altura sem canvas inicializado"))
+		return 0
+	}
+	return canvas.Height
+}
