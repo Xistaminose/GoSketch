@@ -8,7 +8,7 @@ Adicionado: suporte a fill e interface Shape para formas extensíveis.
 Dependência mínima: Ebiten para janela e desenho 2D.
 */
 
-package GoSketch
+package gosketch
 
 import (
 	"fmt"
