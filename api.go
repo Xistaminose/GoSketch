@@ -197,40 +197,28 @@ func RenderShape(s shapes.Shape) {
 	// Identifica o tipo de shape para relatórios de desempenho
 	shapeName := fmt.Sprintf("%T", s)
 	
-	// Define um timeout para detecção de shapes lentas
-	done := make(chan bool, 1)
-	var renderErr error
+	// Registra o tempo antes de iniciar o desenho
+	startTime := time.Now()
 	
-	// Executa o desenho em uma goroutine
-	go func() {
-		// Captura e reporta possíveis pânicos durante o desenho
-		defer func() {
-			if r := recover(); r != nil {
-				renderErr = fmt.Errorf("pânico durante renderização de %s: %v", shapeName, r)
-			}
-			done <- true
-		}()
+	// Captura e reporta possíveis pânicos durante o desenho
+	defer func() {
+		if r := recover(); r != nil {
+			reportError(fmt.Errorf("pânico durante renderização de %s: %v", shapeName, r))
+		}
 		
-		s.Draw(canvas, fillColor, strokeColor, fillEnabled, strokeEnabled, strokeWeight)
+		// Calcula o tempo que levou para desenhar
+		renderTime := time.Since(startTime)
+		
+		// Se demorou mais que o limite, reporta como uma operação lenta
+		if renderTime > 100*time.Millisecond {
+			shapeInfo := fmt.Sprintf("%+v", s)
+			reportError(fmt.Errorf("renderização lenta detectada: %s levou %v - detalhes: %s", 
+				shapeName, renderTime, shapeInfo))
+		}
 	}()
 	
-	// Espera o desenho completar ou atingir timeout
-	select {
-	case <-done:
-		// Renderização completou normalmente
-		if renderErr != nil {
-			reportError(renderErr)
-		}
-	case <-time.After(100 * time.Millisecond): // Ajuste este timeout conforme necessário
-		// Timeout - a renderização está demorando demais
-		reportError(fmt.Errorf("timeout durante renderização de %s - possível bloqueio", shapeName))
-		// Continuamos a execução, não podemos cancelar a goroutine diretamente
-		// mas podemos reportar o problema
-		
-		// Opcional: pegar alguma informação sobre a shape
-		shapeInfo := fmt.Sprintf("%+v", s)
-		reportError(fmt.Errorf("detalhes da shape problemática: %s", shapeInfo))
-	}
+	// Executa o desenho normalmente (sem goroutine)
+	s.Draw(canvas, fillColor, strokeColor, fillEnabled, strokeEnabled, strokeWeight)
 }
 
 // Run inicia o loop principal da janela Ebiten
