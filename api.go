@@ -8,7 +8,6 @@ Adicionado: suporte a fill e interface Shape para formas extensíveis.
 Dependência mínima: Ebiten para janela e desenho 2D.
 */
 
-// sketch/api.go
 package GoSketch
 
 import (
