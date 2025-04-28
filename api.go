@@ -9,7 +9,7 @@ Dependência mínima: Ebiten para janela e desenho 2D.
 */
 
 // sketch/api.go
-package sketch
+package GoSketch
 
 import (
 	"fmt"

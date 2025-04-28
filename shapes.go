@@ -1,4 +1,4 @@
-package sketch
+package GoSketch
 
 import (
 	"image/color"
