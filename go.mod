@@ -1,4 +1,4 @@
-module github.com/Xistaminose/GoSketch
+module github.com/Xistaminose/gosketch
 
 go 1.22.0
 
