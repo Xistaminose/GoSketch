@@ -5,17 +5,36 @@ Biblioteca de arte generativa 2D em Go, inspirada em p5.js/Processing, com API s
 ## 📦 Instalação
 
 ```bash
-go get github.com/Xistaminose/GoSketch
+go get github.com/Xistaminose/gosketch
 ```
 
 Ou, via módulo:
 
 ```bash
 go mod init github.com/seuusuario/seurepo
-go get github.com/Xistaminose/GoSketch@latest
+go get github.com/Xistaminose/gosketch@latest
 ```
 
 ## 🚀 Começando
+
+### Usando a CLI (Recomendado)
+
+A maneira mais fácil de começar é usar nossa ferramenta de linha de comando:
+
+```bash
+# Instale a CLI
+go install github.com/Xistaminose/gosketch/cmd/gosketch@latest
+
+# Crie um novo projeto
+gosketch new meu-primeiro-sketch
+
+# Entre no diretório e execute
+cd meu-primeiro-sketch
+go mod tidy
+go run main.go
+```
+
+### Manualmente
 
 Crie um arquivo `main.go` com o seguinte conteúdo:
 
@@ -24,27 +43,28 @@ package main
 
 import (
   "image/color"
-  "github.com/Xistaminose/GoSketch/sketch"  
+  "github.com/Xistaminose/gosketch"  
 )
 
 func setup() {
-  sketch.CreateCanvas(400, 400)
-  sketch.Fill(color.RGBA{255, 100, 100, 255})
-  sketch.Stroke(color.RGBA{0, 0, 0, 255})
-  sketch.StrokeWeight(2)
+	gosketch.CreateCanvas(400, 400)
+	gosketch.Fill(color.RGBA{255, 100, 100, 255})
+	gosketch.Stroke(color.RGBA{0, 0, 0, 255})
+	gosketch.StrokeWeight(2)
 }
 
 func draw() {
-  sketch.Background(color.RGBA{220, 220, 220, 255})
-  sketch.NoStroke()
-  sketch.RenderShape(&sketch.EllipseShape{X: 200, Y: 200, Rx: 80, Ry: 50})
+	gosketch.Background(color.RGBA{220, 220, 220, 255})
+	gosketch.NoStroke()
+	gosketch.RenderShape(&gosketch.EllipseShape{X: 200, Y: 200, Rx: 80, Ry: 50})
 }
 
 func main() {
-  sketch.Setup(setup)
-  sketch.Draw(draw)
-  sketch.Run()
+	gosketch.Setup(setup)
+	gosketch.Draw(draw)
+	gosketch.Run()
 }
+
 ```
 
 Execute:
@@ -67,7 +87,7 @@ go run main.go
 
 ## 📋 Roadmap
 
-### Versão 1 – Fundamentos
+### Versão 1 – Fundamentos
 
 - point(), line(), triangle(), rect(), ellipse()
 - fill(), stroke(), strokeWeight(), background()
@@ -75,13 +95,13 @@ go run main.go
 - setup(), draw(), sin(), cos(), radians(), random()
 - frameRate(), loop(), noLoop(), millis()
 
-### Versão 2 – Intermediário
+### Versão 2 – Intermediário
 
 - beginShape(), vertex(), endShape(), curve(), bezier()
 - translate(), rotate(), scale(), pushMatrix(), popMatrix()
 - noise(), colorMode(), strokeJoin(), strokeCap()
 
-### Versão 3 – Avançado
+### Versão 3 – Avançado
 
 - text(), loadImage(), image(), getPixel(), setPixel()
 - pixels[], exp(), pow(), sqrt(), smooth()
