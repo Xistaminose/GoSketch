@@ -194,30 +194,13 @@ func RenderShape(s shapes.Shape) {
 		return
 	}
 	
-	// Identifica o tipo de shape para relatórios de desempenho
-	shapeName := fmt.Sprintf("%T", s)
-	
-	// Registra o tempo antes de iniciar o desenho
-	startTime := time.Now()
-	
 	// Captura e reporta possíveis pânicos durante o desenho
 	defer func() {
 		if r := recover(); r != nil {
-			reportError(fmt.Errorf("pânico durante renderização de %s: %v", shapeName, r))
-		}
-		
-		// Calcula o tempo que levou para desenhar
-		renderTime := time.Since(startTime)
-		
-		// Se demorou mais que o limite, reporta como uma operação lenta
-		if renderTime > 100*time.Millisecond {
-			shapeInfo := fmt.Sprintf("%+v", s)
-			reportError(fmt.Errorf("renderização lenta detectada: %s levou %v - detalhes: %s", 
-				shapeName, renderTime, shapeInfo))
+			reportError(fmt.Errorf("pânico durante renderização: %v", r))
 		}
 	}()
 	
-	// Executa o desenho normalmente (sem goroutine)
 	s.Draw(canvas, fillColor, strokeColor, fillEnabled, strokeEnabled, strokeWeight)
 }
 
