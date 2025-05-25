@@ -4,7 +4,9 @@ Descrição: Biblioteca de arte generativa 2D em Go inspirada em p5.js/Processin
 Oferece API simples e intuitiva para criação de sketches interativos com formas geométricas,
 cores, animações e interatividade. Ideal para artistas e programadores explorarem arte
 computacional e visualização criativa.
-Adicionado: suporte a fill e interface Shape para formas extensíveis.
+Adicionado: 
+- suporte a fill e interface Shape para formas extensíveis.
+- funções de controle de loop: NoLoop(), Loop() e Redraw(n) para controlar animações.
 Dependência mínima: Ebiten para janela e desenho 2D.
 */
 
@@ -58,6 +60,14 @@ var (
 	lastFrameTime time.Time   = time.Now()
 	frameRate     float64     = 0
 	errorHandler  func(error) = defaultErrorHandler
+	isLooping     bool        = true  // Controla se o draw loop está ativo ou pausado
+	redrawCount   int         = 0     // Contador para múltiplas execuções do draw quando solicitado
+    targetFPS    int         = 60
+    maxFPS       float64     = 240.0
+    lastDrawTime time.Time   = time.Now()
+    minFrameTime float64     = 0.0001
+    sketchStartTime time.Time = time.Now() // Armazena o momento de início do sketch
+
 )
 
 // defaultErrorHandler é o tratador de erros padrão que registra o erro e o stack trace
@@ -235,19 +245,28 @@ func Run() error {
 type internalGame struct{}
 
 func (g *internalGame) Update() error {
-	// Calcula o frame rate
 	now := time.Now()
 	elapsed := now.Sub(lastFrameTime).Seconds()
 	lastFrameTime = now
-	if elapsed > 0 {
-		frameRate = 1.0 / elapsed
+
+	// Protege contra valores irreais
+	if elapsed < minFrameTime {
+		elapsed = minFrameTime
 	}
-	
+
+	frameRate = 1.0 / elapsed
+
+	// Protege contra estouros absurdos
+	if frameRate > maxFPS {
+		frameRate = maxFPS
+	}
+
 	return nil
 }
 
 func (g *internalGame) Draw(screen *ebiten.Image) {
-	if drawFn != nil {
+	// Executa o draw se o loop estiver ativo ou se há contagem de redraws
+	if drawFn != nil && (isLooping || redrawCount > 0) {
 		// Captura e reporta possíveis pânicos durante o desenho
 		defer func() {
 			if r := recover(); r != nil {
@@ -255,28 +274,101 @@ func (g *internalGame) Draw(screen *ebiten.Image) {
 			}
 		}()
 		
+		// Quando isLooping é falso mas temos redrawCount positivo,
+		// executamos a função draw uma vez por frame e decrementamos o contador
 		drawFn()
+		
+		// Reseta redrawCount após uso
+		if redrawCount > 0 {
+			redrawCount--
+		}
 	}
 	
 	if canvas != nil {
 		op := &ebiten.DrawImageOptions{}
 		screen.DrawImage(canvas.img, op)
 	}
+    delta := time.Since(lastDrawTime)
+    wait := time.Second/time.Duration(targetFPS) - delta
+    if wait > 0 {
+        time.Sleep(wait)
+    }
+    lastDrawTime = time.Now()
 }
 
 func (g *internalGame) Layout(outsideWidth, outsideHeight int) (int, int) {
-	if canvas == nil {
-		reportError(fmt.Errorf("canvas não inicializado ao definir layout"))
+    if canvas == nil {
+        reportError(fmt.Errorf("canvas não inicializado ao definir layout"))
 		return 300, 300 // valor padrão em caso de erro
 	}
 	return canvas.Width, canvas.Height
+}
+
+// NoLoop para a execução contínua da função draw
+// Similar à função noLoop() do p5.js/Processing
+func NoLoop() {
+    isLooping = false
+}
+
+// Loop reinicia a execução contínua da função draw após uma chamada a NoLoop()
+// Similar à função loop() do p5.js/Processing
+func Loop() {
+    isLooping = true
+}
+
+// IsLooping retorna se o loop de desenho está ativo ou não
+func IsLooping() bool {
+    return isLooping
+}
+
+// Redraw força uma ou mais atualizações do canvas
+// Se n > 1, executa a função draw n vezes consecutivas (uma por frame)
+// Útil quando noLoop() está ativo, mas precisa-se atualizar o canvas
+// Quando chamado sem argumentos, executa draw() uma única vez
+// Quando loop está ativo, essa função não tem efeito
+// Similar à função redraw(n) do p5.js/Processing
+func Redraw(n ...int) {
+    if !isLooping {
+        count := 1 // Valor padrão
+        if len(n) > 0 && n[0] > 0 {
+            count = n[0]
+        }
+        redrawCount = count
+    }
+}
+
+// RedrawOnce força uma única atualização do canvas
+// Útil quando noLoop() está ativo, mas precisa-se atualizar o canvas uma vez
+// Equivalente a Redraw(1)
+// Deprecated: Use Redraw() instead
+func RedrawOnce() {
+    Redraw(1)
+}
+
+// FrameRate define o número de quadros por segundo desejado.
+// Se fps <= 0, libera para rodar o mais rápido possível.
+func FrameRate(fps int) {
+    targetFPS = fps
+    if fps > 0 {
+        ebiten.SetVsyncEnabled(false)
+        ebiten.SetTPS(fps)
+    } else {
+        ebiten.SetVsyncEnabled(true)
+        ebiten.SetTPS(ebiten.SyncWithFPS)
+    }
+}
+
+// Millis retorna o número de milissegundos desde que o sketch começou a ser executado
+// Similar à função millis() do p5.js/Processing
+func Millis() int {
+	return int(time.Since(sketchStartTime).Milliseconds())
 }
 
 // ======= FUNÇÕES DE CONVENIÊNCIA =======
 
 // Ellipse cria e renderiza uma elipse em um único passo
 func Ellipse(x, y, rx, ry float64) {
-	if rx <= 0 || ry <= 0 {
+    if rx <= 0 || ry <= 0 {
 		reportError(fmt.Errorf("raio inválido para elipse: rx=%.2f, ry=%.2f - os raios devem ser positivos", rx, ry))
 		return
 	}
